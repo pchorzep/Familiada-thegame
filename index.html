@@ -103,13 +103,20 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
 
+    <!-- Mode Toggle Button -->
+    <div class="mb-6 w-full max-w-2xl flex justify-end">
+        <button id="modeToggleBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg score-button">
+            Switch to Control Mode
+        </button>
+    </div>
+
     <!-- Main Container -->
     <div class="w-full max-w-2xl mx-auto space-y-8">
         <!-- Question Section -->
         <div class="bg-white rounded-2xl shadow-xl p-6 text-center">
             <h2 class="text-xl font-bold text-gray-800 mb-2">Survey Says...</h2>
             <p id="question" class="text-2xl font-semibold text-blue-800">
-                Name a famous landmark.
+                <!-- Question will be updated by JavaScript -->
             </p>
         </div>
         
@@ -118,9 +125,8 @@
             <!-- Cards will be inserted here by JavaScript -->
         </div>
 
-        <!-- Score & Control Panel -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
-            <!-- Team Scores -->
+        <!-- Score Display Panel -->
+        <div id="scoreDisplayPanel" class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
             <div class="flex justify-between items-center text-center">
                 <div class="flex-1">
                     <h3 class="text-xl font-semibold text-gray-700">Team A</h3>
@@ -129,6 +135,17 @@
                 <div class="flex-1">
                     <h3 class="text-xl font-semibold text-gray-700">Team B</h3>
                     <p id="scoreB" class="text-4xl font-extrabold text-red-600">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel (initially hidden) -->
+        <div id="controlPanel" class="bg-white rounded-2xl shadow-xl p-6 space-y-4 hidden">
+            <!-- Answers List for Control Panel -->
+            <div class="space-y-2">
+                <h3 class="text-lg font-bold text-gray-800">Answers</h3>
+                <div id="controlAnswers" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Answers will be dynamically inserted here -->
                 </div>
             </div>
 
@@ -152,20 +169,18 @@
             
             <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <button id="addPointsA" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg score-button">
-                    Add Points to Team A
+                    Add Current Points to Team A
                 </button>
                 <button id="addPointsB" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg score-button">
-                    Add Points to Team B
+                    Add Current Points to Team B
                 </button>
             </div>
-
             <div class="pt-4 text-center">
                 <button id="resetBoard" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg score-button">
                     Reset Board
                 </button>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -182,7 +197,13 @@
             ]
         };
 
+        // Key for localStorage
+        const localStorageKey = 'feudGameState';
+
         // Get all the HTML elements
+        const modeToggleBtn = document.getElementById('modeToggleBtn');
+        const controlPanelEl = document.getElementById('controlPanel');
+        const scoreDisplayPanelEl = document.getElementById('scoreDisplayPanel');
         const questionEl = document.getElementById('question');
         const gameBoardEl = document.getElementById('gameBoard');
         const scoreAEl = document.getElementById('scoreA');
@@ -194,20 +215,50 @@
         const teamABuzz = document.getElementById('teamABuzz');
         const teamBBuzz = document.getElementById('teamBBuzz');
         const resetBtn = document.getElementById('resetBoard');
+        const controlAnswersEl = document.getElementById('controlAnswers');
 
         // Game state variables
-        let scoreA = 0;
-        let scoreB = 0;
-        let boardState = [];
-        let currentPoints = 0;
+        let gameState = {
+            scoreA: 0,
+            scoreB: 0,
+            boardState: [],
+            currentPoints: 0,
+            question: gameData.question
+        };
 
-        // Function to render the game board
+        // Function to load game state from localStorage
+        function loadGameState() {
+            const storedState = localStorage.getItem(localStorageKey);
+            if (storedState) {
+                gameState = JSON.parse(storedState);
+            } else {
+                // If no state exists, initialize a new one
+                gameState.boardState = gameData.answers.map(item => ({ ...item, revealed: false }));
+                saveGameState();
+            }
+        }
+
+        // Function to save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem(localStorageKey, JSON.stringify(gameState));
+        }
+
+        // Function to render the game board based on current state
         function renderBoard() {
-            gameBoardEl.innerHTML = ''; // Clear the board
-            boardState = gameData.answers.map((item, index) => {
+            gameBoardEl.innerHTML = '';
+            questionEl.textContent = gameState.question;
+            gameState.boardState.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.classList.add('feud-card', 'cursor-pointer');
-                card.dataset.index = index;
+                card.classList.add('feud-card');
+                if (item.revealed) {
+                    card.classList.add('revealed');
+                } else {
+                    // Add click listener only to unrevealed cards
+                    card.classList.add('cursor-pointer');
+                    card.addEventListener('click', () => {
+                        revealCard(index + 1);
+                    });
+                }
                 card.innerHTML = `
                     <div class="feud-card-face feud-card-front">
                         <span class="index">${index + 1}</span>
@@ -219,78 +270,121 @@
                     </div>
                 `;
                 gameBoardEl.appendChild(card);
-                return { ...item, revealed: false, element: card };
             });
-            questionEl.textContent = gameData.question;
             updateScores();
+        }
+
+        // Function to render answers on the control panel
+        function renderControlAnswers() {
+            controlAnswersEl.innerHTML = '';
+            gameData.answers.forEach((item, index) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.classList.add('flex', 'justify-between', 'items-center', 'bg-gray-100', 'p-3', 'rounded-lg', 'text-gray-800');
+                answerDiv.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-lg text-blue-600">${index + 1}.</span>
+                        <span class="font-medium">${item.answer}</span>
+                    </div>
+                    <span class="font-bold text-lg text-green-600">${item.value}</span>
+                `;
+                controlAnswersEl.appendChild(answerDiv);
+            });
         }
 
         // Function to reveal a card
         function revealCard(index) {
             const cardIndex = index - 1;
-            if (cardIndex >= 0 && cardIndex < boardState.length) {
-                const card = boardState[cardIndex];
+            if (cardIndex >= 0 && cardIndex < gameState.boardState.length) {
+                const card = gameState.boardState[cardIndex];
                 if (!card.revealed) {
-                    card.element.classList.add('revealed');
                     card.revealed = true;
-                    currentPoints += card.value;
+                    gameState.currentPoints += card.value;
+                    saveGameState();
+                    // Call renderBoard() to immediately update the display after a manual reveal
+                    renderBoard(); 
                 }
             } else {
-                alert('Invalid number. Please enter a number from 1 to ' + boardState.length);
+                alert('Invalid number. Please enter a number from 1 to ' + gameState.boardState.length);
             }
         }
 
         // Function to update the score display
         function updateScores() {
-            scoreAEl.textContent = scoreA;
-            scoreBEl.textContent = scoreB;
+            scoreAEl.textContent = gameState.scoreA;
+            scoreBEl.textContent = gameState.scoreB;
         }
 
         // Function to reset the game board and scores
         function resetBoard() {
-            scoreA = 0;
-            scoreB = 0;
-            currentPoints = 0;
-            renderBoard();
+            gameState.scoreA = 0;
+            gameState.scoreB = 0;
+            gameState.currentPoints = 0;
+            gameState.boardState = gameData.answers.map(item => ({ ...item, revealed: false }));
+            saveGameState();
         }
 
-        // Event listeners
+        // Event listeners for the control panel
         revealBtn.addEventListener('click', () => {
             const index = parseInt(revealInputEl.value);
             revealCard(index);
             revealInputEl.value = '';
         });
 
-        // Add points to Team A
         addPointsA.addEventListener('click', () => {
-            scoreA += currentPoints;
-            currentPoints = 0;
-            updateScores();
-            alert(`Team A scored ${currentPoints} points!`);
+            gameState.scoreA += gameState.currentPoints;
+            gameState.currentPoints = 0;
+            saveGameState();
+            // Call renderBoard() to immediately update the display after a score change
+            renderBoard(); 
+            alert(`Team A scored ${gameState.currentPoints} points!`);
         });
 
-        // Add points to Team B
         addPointsB.addEventListener('click', () => {
-            scoreB += currentPoints;
-            currentPoints = 0;
-            updateScores();
-            alert(`Team B scored ${currentPoints} points!`);
+            gameState.scoreB += gameState.currentPoints;
+            gameState.currentPoints = 0;
+            saveGameState();
+            // Call renderBoard() to immediately update the display after a score change
+            renderBoard();
+            alert(`Team B scored ${gameState.currentPoints} points!`);
         });
 
-        // Buzz in a team
         teamABuzz.addEventListener('click', () => {
             teamABuzz.classList.add('buzzing-button');
             teamBBuzz.classList.remove('buzzing-button');
             setTimeout(() => teamABuzz.classList.remove('buzzing-button'), 1000);
         });
+        
         teamBBuzz.addEventListener('click', () => {
             teamBBuzz.classList.add('buzzing-button');
             teamABuzz.classList.remove('buzzing-button');
             setTimeout(() => teamBBuzz.classList.remove('buzzing-button'), 1000);
         });
 
-        // Reset button listener
-        resetBtn.addEventListener('click', resetBoard);
+        resetBtn.addEventListener('click', () => {
+            resetBoard();
+            // Call renderBoard() after resetting the board to update the display
+            renderBoard();
+        });
+
+        // Listen for changes in localStorage from other tabs/windows
+        window.addEventListener('storage', (e) => {
+            if (e.key === localStorageKey) {
+                loadGameState();
+                renderBoard();
+            }
+        });
+
+        // Toggle between display and control mode
+        modeToggleBtn.addEventListener('click', () => {
+            const isControlMode = controlPanelEl.classList.contains('hidden');
+            if (isControlMode) {
+                controlPanelEl.classList.remove('hidden');
+                modeToggleBtn.textContent = 'Switch to Display Mode';
+            } else {
+                controlPanelEl.classList.add('hidden');
+                modeToggleBtn.textContent = 'Switch to Control Mode';
+            }
+        });
 
         // This is a simple function to replace the native alert() which is blocked in this environment
         function alert(message) {
@@ -316,8 +410,12 @@
             document.body.appendChild(modal);
         }
 
-        // Initialize the board when the page loads
-        document.addEventListener('DOMContentLoaded', renderBoard);
+        // Initialize the board and control answers when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGameState();
+            renderBoard();
+            renderControlAnswers();
+        });
     </script>
 </body>
 </html>
