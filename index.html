@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Tip Calculator</title>
+    <!-- Using Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Using Google Fonts for 'Inter' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Application Container -->
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
+
+        <!-- Header -->
+        <h1 class="text-3xl font-bold text-center text-gray-800">Tip Calculator</h1>
+        <p class="text-center text-gray-600">Enter your bill and tip percentage below.</p>
+
+        <!-- Bill Amount Input Section -->
+        <div>
+            <label for="billAmount" class="block text-sm font-medium text-gray-700 mb-1">Bill Amount ($)</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">$</span>
+                </div>
+                <input type="number" id="billAmount" class="block w-full rounded-lg border-gray-300 pl-7 pr-12 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
+            </div>
+        </div>
+
+        <!-- Tip Percentage Input Section -->
+        <div>
+            <label for="tipPercentage" class="block text-sm font-medium text-gray-700 mb-1">Tip Percentage (%)</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">%</span>
+                </div>
+                <input type="number" id="tipPercentage" class="block w-full rounded-lg border-gray-300 pl-7 pr-12 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="15">
+            </div>
+        </div>
+        
+        <!-- Calculate Button -->
+        <button id="calculateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+            Calculate Tip
+        </button>
+
+        <!-- Results Display Section -->
+        <div id="results" class="space-y-4 pt-4 border-t-2 border-dashed border-gray-200 hidden">
+            <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+                <span class="text-gray-700 font-semibold">Tip Amount:</span>
+                <span id="tipResult" class="text-xl font-bold text-blue-600">$0.00</span>
+            </div>
+            <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                <span class="text-gray-700 font-semibold">Total Bill:</span>
+                <span id="totalResult" class="text-xl font-bold text-green-600">$0.00</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Get the HTML elements we'll be interacting with
+        const billAmountInput = document.getElementById('billAmount');
+        const tipPercentageInput = document.getElementById('tipPercentage');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsDiv = document.getElementById('results');
+        const tipResultSpan = document.getElementById('tipResult');
+        const totalResultSpan = document.getElementById('totalResult');
+
+        // Function to calculate the tip and total
+        function calculateTip() {
+            // Get the values from the input fields and convert them to numbers
+            const billAmount = parseFloat(billAmountInput.value);
+            const tipPercentage = parseFloat(tipPercentageInput.value);
+
+            // Check if the inputs are valid numbers
+            if (isNaN(billAmount) || isNaN(tipPercentage) || billAmount < 0 || tipPercentage < 0) {
+                // If not valid, hide the results and show an alert
+                resultsDiv.classList.add('hidden');
+                // We use a simple message box instead of alert()
+                alert('Please enter valid positive numbers for both fields.');
+                return; // Stop the function here
+            }
+
+            // Calculate the tip and total
+            const tipAmount = billAmount * (tipPercentage / 100);
+            const totalAmount = billAmount + tipAmount;
+
+            // Display the results, formatted to two decimal places
+            tipResultSpan.textContent = `$${tipAmount.toFixed(2)}`;
+            totalResultSpan.textContent = `$${totalAmount.toFixed(2)}`;
+
+            // Show the results section
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Add a click event listener to the button
+        calculateBtn.addEventListener('click', calculateTip);
+
+        // Optional: Add event listeners to the input fields to make it more interactive
+        billAmountInput.addEventListener('input', calculateTip);
+        tipPercentageInput.addEventListener('input', calculateTip);
+        
+        // This is a simple function to replace the native alert() which is blocked in this environment
+        function alert(message) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                padding: 24px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                display: flex; flex-direction: column; align-items: center; z-index: 1000;
+                max-width: 320px; text-align: center;
+            `;
+            const messageText = document.createElement('p');
+            messageText.textContent = message;
+            messageText.style.cssText = 'color: #333; font-size: 16px; margin-bottom: 16px;';
+            const okButton = document.createElement('button');
+            okButton.textContent = 'OK';
+            okButton.style.cssText = `
+                background-color: #3b82f6; color: white; padding: 8px 16px;
+                border-radius: 8px; font-weight: 500; cursor: pointer;
+            `;
+            okButton.onclick = () => { modal.remove(); };
+            modal.appendChild(messageText);
+            modal.appendChild(okButton);
+            document.body.appendChild(modal);
+        }
+    </script>
+
+</body>
+</html>
