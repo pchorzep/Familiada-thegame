@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Tip Calculator</title>
+    <title>Family Feud Board</title>
     <!-- Using Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Using Google Fonts for 'Inter' -->
@@ -13,102 +13,285 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
         }
+
+        .feud-card {
+            background-color: #2b6cb0; /* A nice blue */
+            color: white;
+            transition: all 0.3s ease-in-out;
+            transform-style: preserve-3d;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: 64px; /* Fixed height for consistent look */
+            position: relative;
+        }
+
+        .feud-card.revealed .feud-card-front {
+            transform: rotateY(-180deg);
+        }
+
+        .feud-card.revealed .feud-card-back {
+            transform: rotateY(0deg);
+        }
+        
+        .feud-card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            font-weight: bold;
+        }
+        
+        .feud-card-front {
+            transform: rotateY(0deg);
+            z-index: 2;
+        }
+
+        .feud-card-back {
+            background-color: #38a169; /* A nice green */
+            transform: rotateY(180deg);
+            z-index: 1;
+            padding: 0 1rem;
+        }
+
+        .feud-card-front .index {
+            font-size: 1.5rem;
+            color: #d1d5db;
+        }
+
+        .feud-card-back .answer {
+            font-size: 1.25rem;
+            text-transform: uppercase;
+        }
+        
+        .feud-card-back .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .score-button {
+            transition: all 0.2s ease-in-out;
+            transform: scale(1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .score-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        @keyframes buzz {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .buzzing-button {
+            animation: buzz 0.3s ease-in-out 3;
+        }
+        
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
 
-    <!-- Main Application Container -->
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
-
-        <!-- Header -->
-        <h1 class="text-3xl font-bold text-center text-gray-800">Tip Calculator</h1>
-        <p class="text-center text-gray-600">Enter your bill and tip percentage below.</p>
-
-        <!-- Bill Amount Input Section -->
-        <div>
-            <label for="billAmount" class="block text-sm font-medium text-gray-700 mb-1">Bill Amount ($)</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="text-gray-500 sm:text-sm">$</span>
-                </div>
-                <input type="number" id="billAmount" class="block w-full rounded-lg border-gray-300 pl-7 pr-12 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00">
-            </div>
-        </div>
-
-        <!-- Tip Percentage Input Section -->
-        <div>
-            <label for="tipPercentage" class="block text-sm font-medium text-gray-700 mb-1">Tip Percentage (%)</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="text-gray-500 sm:text-sm">%</span>
-                </div>
-                <input type="number" id="tipPercentage" class="block w-full rounded-lg border-gray-300 pl-7 pr-12 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="15">
-            </div>
+    <!-- Main Container -->
+    <div class="w-full max-w-2xl mx-auto space-y-8">
+        <!-- Question Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 text-center">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Survey Says...</h2>
+            <p id="question" class="text-2xl font-semibold text-blue-800">
+                Name a famous landmark.
+            </p>
         </div>
         
-        <!-- Calculate Button -->
-        <button id="calculateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-            Calculate Tip
-        </button>
+        <!-- Game Board Cards -->
+        <div id="gameBoard" class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            <!-- Cards will be inserted here by JavaScript -->
+        </div>
 
-        <!-- Results Display Section -->
-        <div id="results" class="space-y-4 pt-4 border-t-2 border-dashed border-gray-200 hidden">
-            <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-                <span class="text-gray-700 font-semibold">Tip Amount:</span>
-                <span id="tipResult" class="text-xl font-bold text-blue-600">$0.00</span>
+        <!-- Score & Control Panel -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+            <!-- Team Scores -->
+            <div class="flex justify-between items-center text-center">
+                <div class="flex-1">
+                    <h3 class="text-xl font-semibold text-gray-700">Team A</h3>
+                    <p id="scoreA" class="text-4xl font-extrabold text-blue-600">0</p>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xl font-semibold text-gray-700">Team B</h3>
+                    <p id="scoreB" class="text-4xl font-extrabold text-red-600">0</p>
+                </div>
             </div>
-            <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-                <span class="text-gray-700 font-semibold">Total Bill:</span>
-                <span id="totalResult" class="text-xl font-bold text-green-600">$0.00</span>
+
+            <!-- Input for revealing answers -->
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="number" id="revealInput" placeholder="Reveal # (1-6)" class="flex-1 rounded-lg border-gray-300 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="revealBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg score-button">
+                    Reveal Answer
+                </button>
+            </div>
+            
+            <!-- Buzz-in and Point Buttons -->
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
+                <button id="teamABuzz" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-4 px-4 rounded-lg score-button">
+                    Team A Buzz
+                </button>
+                <button id="teamBBuzz" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-4 px-4 rounded-lg score-button">
+                    Team B Buzz
+                </button>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="addPointsA" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg score-button">
+                    Add Points to Team A
+                </button>
+                <button id="addPointsB" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg score-button">
+                    Add Points to Team B
+                </button>
+            </div>
+
+            <div class="pt-4 text-center">
+                <button id="resetBoard" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg score-button">
+                    Reset Board
+                </button>
             </div>
         </div>
 
     </div>
 
     <script>
-        // Get the HTML elements we'll be interacting with
-        const billAmountInput = document.getElementById('billAmount');
-        const tipPercentageInput = document.getElementById('tipPercentage');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const resultsDiv = document.getElementById('results');
-        const tipResultSpan = document.getElementById('tipResult');
-        const totalResultSpan = document.getElementById('totalResult');
+        // Game data - change this to create new questions and answers
+        const gameData = {
+            question: "Name a famous landmark.",
+            answers: [
+                { answer: "Eiffel Tower", value: 35 },
+                { answer: "Statue of Liberty", value: 25 },
+                { answer: "Great Wall of China", value: 18 },
+                { answer: "Pyramids of Giza", value: 12 },
+                { answer: "Colosseum", value: 8 },
+                { answer: "Taj Mahal", value: 2 }
+            ]
+        };
 
-        // Function to calculate the tip and total
-        function calculateTip() {
-            // Get the values from the input fields and convert them to numbers
-            const billAmount = parseFloat(billAmountInput.value);
-            const tipPercentage = parseFloat(tipPercentageInput.value);
+        // Get all the HTML elements
+        const questionEl = document.getElementById('question');
+        const gameBoardEl = document.getElementById('gameBoard');
+        const scoreAEl = document.getElementById('scoreA');
+        const scoreBEl = document.getElementById('scoreB');
+        const revealInputEl = document.getElementById('revealInput');
+        const revealBtn = document.getElementById('revealBtn');
+        const addPointsA = document.getElementById('addPointsA');
+        const addPointsB = document.getElementById('addPointsB');
+        const teamABuzz = document.getElementById('teamABuzz');
+        const teamBBuzz = document.getElementById('teamBBuzz');
+        const resetBtn = document.getElementById('resetBoard');
 
-            // Check if the inputs are valid numbers
-            if (isNaN(billAmount) || isNaN(tipPercentage) || billAmount < 0 || tipPercentage < 0) {
-                // If not valid, hide the results and show an alert
-                resultsDiv.classList.add('hidden');
-                // We use a simple message box instead of alert()
-                alert('Please enter valid positive numbers for both fields.');
-                return; // Stop the function here
-            }
+        // Game state variables
+        let scoreA = 0;
+        let scoreB = 0;
+        let boardState = [];
+        let currentPoints = 0;
 
-            // Calculate the tip and total
-            const tipAmount = billAmount * (tipPercentage / 100);
-            const totalAmount = billAmount + tipAmount;
-
-            // Display the results, formatted to two decimal places
-            tipResultSpan.textContent = `$${tipAmount.toFixed(2)}`;
-            totalResultSpan.textContent = `$${totalAmount.toFixed(2)}`;
-
-            // Show the results section
-            resultsDiv.classList.remove('hidden');
+        // Function to render the game board
+        function renderBoard() {
+            gameBoardEl.innerHTML = ''; // Clear the board
+            boardState = gameData.answers.map((item, index) => {
+                const card = document.createElement('div');
+                card.classList.add('feud-card', 'cursor-pointer');
+                card.dataset.index = index;
+                card.innerHTML = `
+                    <div class="feud-card-face feud-card-front">
+                        <span class="index">${index + 1}</span>
+                        <span class="text-xl font-bold">FEUD!</span>
+                    </div>
+                    <div class="feud-card-face feud-card-back">
+                        <span class="answer">${item.answer}</span>
+                        <span class="value">${item.value}</span>
+                    </div>
+                `;
+                gameBoardEl.appendChild(card);
+                return { ...item, revealed: false, element: card };
+            });
+            questionEl.textContent = gameData.question;
+            updateScores();
         }
 
-        // Add a click event listener to the button
-        calculateBtn.addEventListener('click', calculateTip);
+        // Function to reveal a card
+        function revealCard(index) {
+            const cardIndex = index - 1;
+            if (cardIndex >= 0 && cardIndex < boardState.length) {
+                const card = boardState[cardIndex];
+                if (!card.revealed) {
+                    card.element.classList.add('revealed');
+                    card.revealed = true;
+                    currentPoints += card.value;
+                }
+            } else {
+                alert('Invalid number. Please enter a number from 1 to ' + boardState.length);
+            }
+        }
 
-        // Optional: Add event listeners to the input fields to make it more interactive
-        billAmountInput.addEventListener('input', calculateTip);
-        tipPercentageInput.addEventListener('input', calculateTip);
-        
+        // Function to update the score display
+        function updateScores() {
+            scoreAEl.textContent = scoreA;
+            scoreBEl.textContent = scoreB;
+        }
+
+        // Function to reset the game board and scores
+        function resetBoard() {
+            scoreA = 0;
+            scoreB = 0;
+            currentPoints = 0;
+            renderBoard();
+        }
+
+        // Event listeners
+        revealBtn.addEventListener('click', () => {
+            const index = parseInt(revealInputEl.value);
+            revealCard(index);
+            revealInputEl.value = '';
+        });
+
+        // Add points to Team A
+        addPointsA.addEventListener('click', () => {
+            scoreA += currentPoints;
+            currentPoints = 0;
+            updateScores();
+            alert(`Team A scored ${currentPoints} points!`);
+        });
+
+        // Add points to Team B
+        addPointsB.addEventListener('click', () => {
+            scoreB += currentPoints;
+            currentPoints = 0;
+            updateScores();
+            alert(`Team B scored ${currentPoints} points!`);
+        });
+
+        // Buzz in a team
+        teamABuzz.addEventListener('click', () => {
+            teamABuzz.classList.add('buzzing-button');
+            teamBBuzz.classList.remove('buzzing-button');
+            setTimeout(() => teamABuzz.classList.remove('buzzing-button'), 1000);
+        });
+        teamBBuzz.addEventListener('click', () => {
+            teamBBuzz.classList.add('buzzing-button');
+            teamABuzz.classList.remove('buzzing-button');
+            setTimeout(() => teamBBuzz.classList.remove('buzzing-button'), 1000);
+        });
+
+        // Reset button listener
+        resetBtn.addEventListener('click', resetBoard);
+
         // This is a simple function to replace the native alert() which is blocked in this environment
         function alert(message) {
             const modal = document.createElement('div');
@@ -132,7 +315,9 @@
             modal.appendChild(okButton);
             document.body.appendChild(modal);
         }
-    </script>
 
+        // Initialize the board when the page loads
+        document.addEventListener('DOMContentLoaded', renderBoard);
+    </script>
 </body>
 </html>
