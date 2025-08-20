@@ -237,6 +237,10 @@
             <h4 class="text-lg font-semibold text-yellow-500">Current Question:</h4>
             <p id="controlQuestionDisplay" class="text-lg italic mb-2"></p>
         </div>
+        <!-- New element to display the number of questions remaining -->
+        <div class="mb-4 text-center">
+            <p id="questionsLeftDisplay" class="text-sm text-gray-400">Questions Remaining: <span id="questionsLeftCount">15</span></p>
+        </div>
 
         <!-- Main control grid with buttons and answers -->
         <div class="grid grid-cols-3 gap-4 items-start">
@@ -318,11 +322,11 @@
             <form id="startGameForm" class="flex flex-col space-y-4">
                 <div class="flex flex-col items-start w-full">
                     <label for="team1Name" class="text-sm font-semibold mb-1">RODZINA 1:</label>
-                    <input type="text" id="team1Name" placeholder="Nazwa Rodziny 1" class="w-full p-2 rounded-lg bg-gray-800 text-white">
+                    <input type="text" id="team1Name" placeholder="Nazwa Rodziny 1" autocomplete="off" class="w-full p-2 rounded-lg bg-gray-800 text-white">
                 </div>
                 <div class="flex flex-col items-start w-full">
                     <label for="team2Name" class="text-sm font-semibold mb-1">RODZINA 2:</label>
-                    <input type="text" id="team2Name" placeholder="Nazwa Rodziny 2" class="w-full p-2 rounded-lg bg-gray-800 text-white">
+                    <input type="text" id="team2Name" placeholder="Nazwa Rodziny 2" autocomplete="off" class="w-full p-2 rounded-lg bg-gray-800 text-white">
                 </div>
                 <button type="submit" id="startGameBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg cursor-pointer">
                     Rozpocznij Grę
@@ -335,6 +339,138 @@
         // Game data - change this to create new questions and answers
         const allGameData = [
             {
+                question: "Wymień najbardziej znane modele AI",
+                answers: [
+                    { answer: "ChatGPT (OpenAI)", value: 45 },
+                    { answer: "Claude (Anthropic)", value: 25 },
+                    { answer: "Gemini (Google)", value: 20 },
+                    { answer: "Copilot", value: 15 },
+                    { answer: "Midjourney", value: 10 },
+                    { answer: "Runway", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień najbardziej znane platformy streamingowe",
+                answers: [
+                    { answer: "Netflix", value: 45 },
+                    { answer: "YouTube", value: 25 },
+                    { answer: "Amazon Prime Video", value: 20 },
+                    { answer: "Disney+", value: 15 },
+                    { answer: "HBO Max", value: 10 },
+                    { answer: "Spotify", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień najbardziej popularne desery",
+                answers: [
+                    { answer: "Dubajska czekolada", value: 45 },
+                    { answer: "Jegodzianka", value: 25 },
+                    { answer: "Szarlotka", value: 20 },
+                    { answer: "Wszystko o masło", value: 15 },
+                    { answer: "Pączki", value: 10 },
+                    { answer: "Tiramisu", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień znane polskie teleturnieje",
+                answers: [
+                    { answer: "Familiada", value: 45 },
+                    { answer: "Milionerzy", value: 35 },
+                    { answer: "Jaka to melodia", value: 25 },
+                    { answer: "Kocham Cię, Polsko!", value: 15 },
+                    { answer: "Postaw na milion", value: 10 },
+                    { answer: "Kto na to idzie?", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień popularne zwierzęta z rodziny jeleniowatych",
+                answers: [
+                    { answer: "Łama", value: 40 },
+                    { answer: "Łoś", value: 30 },
+                    { answer: "Jeleń", value: 20 },
+                    { answer: "Sarna", value: 15 },
+                    { answer: "Bizon", value: 10 },
+                    { answer: "Żubr", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień popularne młodzieżowe słowa roku",
+                answers: [
+                    { answer: "Sigma", value: 35 },
+                    { answer: "Delulu", value: 25 },
+                    { answer: "Bae", value: 15 },
+                    { answer: "Lit", value: 10 },
+                    { answer: "GOAT", value: 5 },
+                    { answer: "Essa", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień firmę lub urządzenie, które zrewolucjonizowało nasze życie w XXI wieku",
+                answers: [
+                    { answer: "Smartfon", value: 40 },
+                    { answer: "Laptop", value: 30 },
+                    { answer: "Tablet", value: 20 },
+                    { answer: "Smartwatch", value: 15 },
+                    { answer: "Kamera internetowa", value: 10 },
+                    { answer: "Słuchawki bezprzewodowe", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień ulubione marki mody",
+                answers: [
+                    { answer: "Gucci", value: 40 },
+                    { answer: "Louis Vuitton", value: 30 },
+                    { answer: "Prada", value: 20 },
+                    { answer: "Balenciaga", value: 15 },
+                    { answer: "Dior", value: 10 },
+                    { answer: "Versace", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień najbardziej znaną postać z Harry'ego Pottera",
+                answers: [
+                    { answer: "HARRY POTTER", value: 40 },
+                    { answer: "HERMIONA GRANGER", value: 30 },
+                    { answer: "RON WEASLEY", value: 15 },
+                    { answer: "ALBUS DUMBLEDORE", value: 10 },
+                    { answer: "VOLDEMORT", value: 5 },
+                    { answer: "SEVERUS SNAPE", value: 0 }
+                ]
+            },
+            {
+                question: "Wymień popularne zespoły rockowe z przełomu lat 90/00",
+                answers: [
+                    { answer: "Linkin Park", value: 45 },
+                    { answer: "20 Seconds to Mars", value: 25 },
+                    { answer: "Red Hot Chili Peppers", value: 20 },
+                    { answer: "My Chemical Romance", value: 15 },
+                    { answer: "Evanescence", value: 10 },
+                    { answer: "Green Day", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień popularne gry z dzieciństwa (planszowe, komputerowe lub podróżne)",
+                answers: [
+                    { answer: "Super Mario", value: 45 },
+                    { answer: "Gra w karty", value: 25 },
+                    { answer: "Tetris", value: 20 },
+                    { answer: "Pokemon GO", value: 15 },
+                    { answer: "Gra w klocki", value: 10 },
+                    { answer: "The Sims", value: 5 }
+                ]
+            },
+            {
+                question: "Fuji to",
+                answers: [
+                    { answer: "Pies", value: 40 },
+                    { answer: "Góra", value: 30 },
+                    { answer: "Wulkan", value: 20 },
+                    { answer: "Lód", value: 15 },
+                    { answer: "Rasa", value: 10 },
+                    { answer: "Symbol Japonii", value: 5 }
+                ]
+            },
+            {
                 question: "Wymień serial, o którym wszyscy mówili w latach 2010–2025",
                 answers: [
                     { answer: "Gra o tron", value: 43 },
@@ -346,14 +482,25 @@
                 ]
             },
             {
-                question: "WYMIEŃ NAJ BARDZIEJ ZNANĄ POSTAĆ Z HARRY'EGO POTTERA",
+                question: "Wymień modę żywieniową ostatnich lat",
                 answers: [
-                    { answer: "HARRY POTTER", value: 40 },
-                    { answer: "HERMIONA GRANGER", value: 30 },
-                    { answer: "RON WEASLEY", value: 15 },
-                    { answer: "ALBUS DUMBLEDORE", value: 10 },
-                    { answer: "VOLDEMORT", value: 5 },
-                    { answer: "SEVERUS SNAPE", value: 0 }
+                    { answer: "Keto", value: 40 },
+                    { answer: "Post przerywany (okienko żywieniowe)", value: 30 },
+                    { answer: "Dieta paleo", value: 20 },
+                    { answer: "Carnivore", value: 15 },
+                    { answer: "Dieta sokowa", value: 10 },
+                    { answer: "Dieta bezglutenowa", value: 5 }
+                ]
+            },
+            {
+                question: "Wymień znane pary ze świata showbusinessu (kiedyś i dziś)",
+                answers: [
+                    { answer: "Beyoncé i Jay-Z", value: 40 },
+                    { answer: "Kim Kardashian i Kanye West", value: 30 },
+                    { answer: "Brad Pitt i Angelina Jolie", value: 20 },
+                    { answer: "David i Victoria Beckham", value: 15 },
+                    { answer: "Britney Spears i Justin Timberlake", value: 10 },
+                    { answer: "Zendaya i Tom Holland", value: 5 }
                 ]
             }
         ];
@@ -387,6 +534,9 @@
         const controlQuestionDisplayEl = document.getElementById('controlQuestionDisplay');
         const teamAToggle = document.getElementById('teamAToggle');
         const teamBToggle = document.getElementById('teamBToggle');
+        // New elements for the question counter
+        const questionsLeftDisplay = document.getElementById('questionsLeftDisplay');
+        const questionsLeftCount = document.getElementById('questionsLeftCount');
 
         // Modal elements for reset confirmation
         const confirmModal = document.getElementById('confirmModal');
@@ -408,6 +558,7 @@
             boardState: [],
             currentPoints: 0,
             currentQuestionIndex: 0,
+            availableQuestions: [], // New array to track available question indices
             activeTeam: null, // 'A' or 'B'
             questionRevealed: false,
             teamNameA: 'RODZINA 1',
@@ -422,6 +573,9 @@
                 if (gameState.currentQuestionIndex === undefined || !allGameData[gameState.currentQuestionIndex]) {
                     // If the stored state is invalid or missing the question index, reset to the first question
                     gameState.currentQuestionIndex = 0;
+                    if (!gameState.availableQuestions || gameState.availableQuestions.length === 0) {
+                        initializeAvailableQuestions();
+                    }
                 }
                 // Check if team names are present, otherwise show the start modal
                 if (!gameState.teamNameA || !gameState.teamNameB) {
@@ -431,11 +585,17 @@
                     renderBoard();
                     renderControlPanelAnswers();
                     highlightActiveTeam();
+                    updateQuestionsLeftDisplay();
                 }
             } else {
                 // If no state exists, show the start modal to set names
                 showStartModal();
             }
+        }
+        
+        // Function to initialize the available questions array
+        function initializeAvailableQuestions() {
+            gameState.availableQuestions = Array.from({length: allGameData.length}, (_, i) => i);
         }
 
         // Function to save game state to localStorage
@@ -446,6 +606,11 @@
         // Function to render the game board based on current state
         function renderBoard() {
             gameBoardEl.innerHTML = '';
+            // Check if there are questions left before rendering
+            if (gameState.availableQuestions.length === 0 && gameState.questionRevealed === false) {
+                 questionEl.textContent = 'GAME OVER!';
+                 return;
+            }
             const currentQuestion = allGameData[gameState.currentQuestionIndex].question;
             const currentPoints = gameState.currentPoints;
 
@@ -479,6 +644,11 @@
         // Function to render the answers list in the control panel
         function renderControlPanelAnswers() {
             controlAnswerListEl.innerHTML = ''; // Clear previous answers
+            // If the game is over, do not render answers
+            if (gameState.availableQuestions.length === 0 && gameState.questionRevealed === false) {
+                controlAnswerListEl.innerHTML = '<p class="text-white text-center">No more questions available. Please reset the game.</p>';
+                return;
+            }
             gameState.boardState.forEach((item, index) => {
                 const answerItem = document.createElement('div');
                 answerItem.classList.add('flex', 'items-center', 'space-x-2');
@@ -563,6 +733,11 @@
                 teamBToggle.classList.add('active');
             }
         }
+        
+        // Function to update the question count display
+        function updateQuestionsLeftDisplay() {
+            questionsLeftCount.textContent = gameState.availableQuestions.length;
+        }
 
         // Function to update the team names on the main board and control panel
         function updateTeamNamesDisplay() {
@@ -574,6 +749,20 @@
 
         // Function to reset the current round (strikes and revealed answers), but keep the score
         function resetRound() {
+            // Check if there are any questions left
+            if (gameState.availableQuestions.length === 0) {
+                alert("All questions have been used. Please reset the entire game to play again.");
+                return;
+            }
+            
+            // Select a random, unused question
+            const randomIndex = Math.floor(Math.random() * gameState.availableQuestions.length);
+            const selectedQuestionIndex = gameState.availableQuestions[randomIndex];
+            
+            // Set the new question index and remove it from the available list
+            gameState.currentQuestionIndex = selectedQuestionIndex;
+            gameState.availableQuestions.splice(randomIndex, 1);
+
             const currentGameData = allGameData[gameState.currentQuestionIndex];
             gameState.strikesA = 0;
             gameState.strikesB = 0;
@@ -585,6 +774,7 @@
             renderBoard();
             renderControlPanelAnswers();
             highlightActiveTeam();
+            updateQuestionsLeftDisplay();
         }
 
         // Function to start a new game from scratch
@@ -594,6 +784,7 @@
             gameState.currentQuestionIndex = 0;
             gameState.teamNameA = null; // Clear names to trigger start modal
             gameState.teamNameB = null; // Clear names to trigger start modal
+            initializeAvailableQuestions(); // Reset available questions
             localStorage.removeItem(localStorageKey);
             showStartModal();
         }
@@ -675,8 +866,6 @@
 
 
         nextQuestionBtn.addEventListener('click', () => {
-            // Move to the next question, looping back to the start
-            gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % allGameData.length;
             resetRound();
         });
         
@@ -694,7 +883,7 @@
             confirmModal.classList.add('hidden');
         });
 
-        // Event listener for the start game form
+        // The logic for handling the form submission has been updated to prevent an unnecessary reset.
         startGameForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const team1Name = team1NameInput.value.trim() || 'RODZINA 1';
@@ -703,10 +892,17 @@
             gameState.teamNameA = team1Name;
             gameState.teamNameB = team2Name;
             
+            // Re-initialize the board state for the first question without resetting scores or strikes.
+            initializeAvailableQuestions();
+            resetRound(); // This will select the first random question
+            
             saveGameState();
             updateTeamNamesDisplay();
             startModal.classList.add('hidden');
-            resetRound();
+            renderBoard();
+            renderControlPanelAnswers();
+            highlightActiveTeam();
+            updateQuestionsLeftDisplay();
         });
 
         // Listen for changes in localStorage from other tabs/windows
