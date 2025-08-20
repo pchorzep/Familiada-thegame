@@ -175,6 +175,10 @@
         .dotted-line {
             letter-spacing: 0.5rem;
         }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-black min-h-screen p-8 flex flex-col items-center justify-center">
@@ -183,7 +187,7 @@
     <div class="w-full max-w-5xl flex justify-between items-start mb-12">
         <!-- Team A Score -->
         <div id="scoreBoxA" class="score-box bg-red-600">
-            <h3 class="font-bold">RODZINA 1</h3>
+            <h3 id="teamNameA" class="font-bold">RODZINA 1</h3>
             <p id="scoreA" class="font-bold">0</p>
         </div>
         
@@ -194,7 +198,7 @@
 
         <!-- Team B Score -->
         <div id="scoreBoxB" class="score-box bg-blue-600">
-            <h3 class="font-bold">RODZINA 2</h3>
+            <h3 id="teamNameB" class="font-bold">RODZINA 2</h3>
             <p id="scoreB" class="font-bold">0</p>
         </div>
     </div>
@@ -306,6 +310,26 @@
             </div>
         </div>
     </div>
+
+    <!-- Start Game Modal (New) -->
+    <div id="startModal" class="modal-overlay">
+        <div class="modal-content">
+            <h4 class="text-2xl font-bold mb-4">Wpisz nazwy drużyn</h4>
+            <form id="startGameForm" class="flex flex-col space-y-4">
+                <div class="flex flex-col items-start w-full">
+                    <label for="team1Name" class="text-sm font-semibold mb-1">RODZINA 1:</label>
+                    <input type="text" id="team1Name" placeholder="Nazwa Rodziny 1" class="w-full p-2 rounded-lg bg-gray-800 text-white">
+                </div>
+                <div class="flex flex-col items-start w-full">
+                    <label for="team2Name" class="text-sm font-semibold mb-1">RODZINA 2:</label>
+                    <input type="text" id="team2Name" placeholder="Nazwa Rodziny 2" class="w-full p-2 rounded-lg bg-gray-800 text-white">
+                </div>
+                <button type="submit" id="startGameBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg cursor-pointer">
+                    Rozpocznij Grę
+                </button>
+            </form>
+        </div>
+    </div>
     
     <script>
         // Game data - change this to create new questions and answers
@@ -346,6 +370,8 @@
         const scoreBEl = document.getElementById('scoreB');
         const scoreBoxA = document.getElementById('scoreBoxA');
         const scoreBoxB = document.getElementById('scoreBoxB');
+        const teamNameAEl = document.getElementById('teamNameA');
+        const teamNameBEl = document.getElementById('teamNameB');
         const addPointsA = document.getElementById('addPointsA');
         const addPointsB = document.getElementById('addPointsB');
         const addStrikeA = document.getElementById('addStrikeA');
@@ -367,6 +393,12 @@
         const confirmYesBtn = document.getElementById('confirmYes');
         const confirmNoBtn = document.getElementById('confirmNo');
 
+        // New start modal elements
+        const startModal = document.getElementById('startModal');
+        const startGameForm = document.getElementById('startGameForm');
+        const team1NameInput = document.getElementById('team1Name');
+        const team2NameInput = document.getElementById('team2Name');
+
         // Game state variables
         let gameState = {
             scoreA: 0,
@@ -377,7 +409,9 @@
             currentPoints: 0,
             currentQuestionIndex: 0,
             activeTeam: null, // 'A' or 'B'
-            questionRevealed: false
+            questionRevealed: false,
+            teamNameA: 'RODZINA 1',
+            teamNameB: 'RODZINA 2'
         };
 
         // Function to load game state from localStorage
@@ -388,17 +422,19 @@
                 if (gameState.currentQuestionIndex === undefined || !allGameData[gameState.currentQuestionIndex]) {
                     // If the stored state is invalid or missing the question index, reset to the first question
                     gameState.currentQuestionIndex = 0;
-                    startNewRound();
+                }
+                // Check if team names are present, otherwise show the start modal
+                if (!gameState.teamNameA || !gameState.teamNameB) {
+                    showStartModal();
                 } else {
-                    // Update the scores and board based on the loaded state
-                    updateScores();
+                    updateTeamNamesDisplay();
                     renderBoard();
                     renderControlPanelAnswers();
                     highlightActiveTeam();
                 }
             } else {
-                // If no state exists, initialize a new one from default data
-                startNewRound();
+                // If no state exists, show the start modal to set names
+                showStartModal();
             }
         }
 
@@ -449,7 +485,7 @@
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `answer-${index}`;
-                checkbox.classList.add('h-5', 'w-5', 'text-yellow-500', 'rounded', 'border-gray-300', 'focus:ring-yellow-500');
+                checkbox.classList.add('h-5', 'w-5', 'text-yellow-500', 'rounded', 'border-gray-300', 'focus:ring-yellow-500', 'cursor-pointer');
                 checkbox.checked = item.revealed;
                 checkbox.disabled = item.revealed;
                 checkbox.addEventListener('change', (e) => {
@@ -459,7 +495,7 @@
                 });
                 const label = document.createElement('label');
                 label.htmlFor = `answer-${index}`;
-                label.classList.add('text-lg', 'font-semibold');
+                label.classList.add('text-lg', 'font-semibold', 'cursor-pointer');
                 label.textContent = `${item.answer} (${item.value})`;
                 answerItem.appendChild(checkbox);
                 answerItem.appendChild(label);
@@ -528,6 +564,14 @@
             }
         }
 
+        // Function to update the team names on the main board and control panel
+        function updateTeamNamesDisplay() {
+            teamNameAEl.textContent = gameState.teamNameA;
+            teamAToggle.textContent = gameState.teamNameA;
+            teamNameBEl.textContent = gameState.teamNameB;
+            teamBToggle.textContent = gameState.teamNameB;
+        }
+
         // Function to reset the current round (strikes and revealed answers), but keep the score
         function resetRound() {
             const currentGameData = allGameData[gameState.currentQuestionIndex];
@@ -536,26 +580,27 @@
             gameState.currentPoints = 0;
             gameState.boardState = currentGameData.answers.map(item => ({ ...item, revealed: false }));
             gameState.questionRevealed = false;
+            gameState.activeTeam = null;
             saveGameState();
-        }
-
-        // Function to start a new round
-        function startNewRound() {
-            resetRound();
-            gameState.activeTeam = null; // No active team at the start of a round
-            highlightActiveTeam(); // Remove any previous highlight
             renderBoard();
             renderControlPanelAnswers();
+            highlightActiveTeam();
         }
 
-        // Function to reset the entire game
+        // Function to start a new game from scratch
         function resetGame() {
             gameState.scoreA = 0;
             gameState.scoreB = 0;
             gameState.currentQuestionIndex = 0;
-            resetRound();
-            gameState.activeTeam = null;
-            highlightActiveTeam();
+            gameState.teamNameA = null; // Clear names to trigger start modal
+            gameState.teamNameB = null; // Clear names to trigger start modal
+            localStorage.removeItem(localStorageKey);
+            showStartModal();
+        }
+        
+        // Function to show the start game modal
+        function showStartModal() {
+            startModal.classList.remove('hidden');
         }
 
         // Event listeners for the control panel
@@ -564,6 +609,7 @@
                 gameState.scoreA += gameState.currentPoints;
                 gameState.currentPoints = 0;
                 saveGameState();
+                updateScores();
                 renderBoard();
             } else {
                 alert("Team A is not the active team! Please select them with the toggle.");
@@ -575,6 +621,7 @@
                 gameState.scoreB += gameState.currentPoints;
                 gameState.currentPoints = 0;
                 saveGameState();
+                updateScores();
                 renderBoard();
             } else {
                 alert("Team B is not the active team! Please select them with the toggle.");
@@ -630,7 +677,7 @@
         nextQuestionBtn.addEventListener('click', () => {
             // Move to the next question, looping back to the start
             gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % allGameData.length;
-            startNewRound();
+            resetRound();
         });
         
         // Event listener for the custom confirmation modal on reset
@@ -639,13 +686,27 @@
         });
 
         confirmYesBtn.addEventListener('click', () => {
-            resetGame();
-            renderBoard();
             confirmModal.classList.add('hidden');
+            resetGame();
         });
         
         confirmNoBtn.addEventListener('click', () => {
             confirmModal.classList.add('hidden');
+        });
+
+        // Event listener for the start game form
+        startGameForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const team1Name = team1NameInput.value.trim() || 'RODZINA 1';
+            const team2Name = team2NameInput.value.trim() || 'RODZINA 2';
+            
+            gameState.teamNameA = team1Name;
+            gameState.teamNameB = team2Name;
+            
+            saveGameState();
+            updateTeamNamesDisplay();
+            startModal.classList.add('hidden');
+            resetRound();
         });
 
         // Listen for changes in localStorage from other tabs/windows
