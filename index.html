@@ -3,207 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Feud Board</title>
+    <title>Familiada Classic Board</title>
     <!-- Using Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Using Google Fonts for 'Inter' -->
+    <!-- Using Google Fonts for 'Bebas Neue' -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7fafc;
+            font-family: 'Bebas Neue', sans-serif;
+            background-color: #000; /* Solid black background */
+            color: #fff;
         }
 
-        .feud-card {
-            background-color: #2b6cb0; /* A nice blue */
-            color: white;
-            transition: all 0.3s ease-in-out;
-            transform-style: preserve-3d;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            height: 64px; /* Fixed height for consistent look */
-            position: relative;
-        }
-
-        .feud-card.revealed .feud-card-front {
-            transform: rotateY(-180deg);
-        }
-
-        .feud-card.revealed .feud-card-back {
-            transform: rotateY(0deg);
+        .score-box {
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
         }
         
-        .feud-card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
+        .score-box h3 {
+            font-size: 1.5rem;
+        }
+        
+        .score-box p {
+            font-size: 3rem;
+        }
+
+        .question-box {
+            background-color: transparent;
+            color: #ffcc00; /* Yellow text for question */
+            border-radius: 1rem;
+            text-align: center;
+            font-size: 2.25rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            max-width: 80%;
+            margin: auto;
+        }
+
+        .answer-list {
+            margin-top: 4rem;
+        }
+
+        .answer-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1rem;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
         }
         
-        .feud-card-front {
-            transform: rotateY(0deg);
-            z-index: 2;
+        .answer-number {
+            font-size: 2.5rem;
+            color: #ffcc00;
+            padding-right: 1.5rem;
+            line-height: 1;
         }
 
-        .feud-card-back {
-            background-color: #38a169; /* A nice green */
-            transform: rotateY(180deg);
-            z-index: 1;
-            padding: 0 1rem;
+        .answer-line-container {
+            flex-grow: 1;
+            position: relative;
+            height: 40px;
         }
 
-        .feud-card-front .index {
-            font-size: 1.5rem;
-            color: #d1d5db;
-        }
-
-        .feud-card-back .answer {
-            font-size: 1.25rem;
-            text-transform: uppercase;
+        .answer-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            transform: translateY(-50%);
+            border-bottom: 4px solid #ffcc00;
         }
         
-        .feud-card-back .value {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .score-button {
-            transition: all 0.2s ease-in-out;
-            transform: scale(1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .score-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        @keyframes buzz {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-5px); }
-            40% { transform: translateX(5px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
-        }
-
-        .buzzing-button {
-            animation: buzz 0.3s ease-in-out 3;
+        .answer-text {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: #000;
+            background-color: #ffcc00;
+            padding: 0.25rem 0.5rem;
         }
         
+        .answer-value {
+            font-size: 2rem;
+            color: #fff;
+            padding-left: 1.5rem;
+            line-height: 1;
+        }
+        
+        .strike-icon {
+            font-size: 2rem;
+            color: red;
+            text-shadow: 1px 1px 2px #000;
+        }
+        
+        /* Control Panel Styles */
+        .control-panel {
+            background-color: #111;
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .control-panel button {
+            transition: background-color 0.2s;
+        }
+
+        .control-panel button:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
+<body class="bg-black min-h-screen p-8 flex flex-col items-center justify-center">
+
+    <!-- Top Score and Question Area -->
+    <div class="w-full max-w-5xl flex justify-between items-start mb-12">
+        <!-- Team A Score -->
+        <div class="score-box bg-red-600">
+            <h3 class="font-bold">RODZINA 1</h3>
+            <p id="scoreA" class="font-bold">0</p>
+        </div>
+        
+        <!-- Question Box -->
+        <div class="question-box p-4 font-bold">
+            <p id="question">WYMIEŃ NAJ BARDZIEJ ZNANĄ POSTAĆ Z HARRY'EGO POTTERA</p>
+        </div>
+
+        <!-- Team B Score -->
+        <div class="score-box bg-blue-600">
+            <h3 class="font-bold">RODZINA 2</h3>
+            <p id="scoreB" class="font-bold">0</p>
+        </div>
+    </div>
+
+    <!-- Main Game Board -->
+    <div id="gameBoard" class="w-full max-w-5xl text-yellow-500 font-bold answer-list">
+        <!-- Answers will be dynamically inserted here -->
+    </div>
+
+    <!-- Strikes Display -->
+    <div class="flex justify-center mt-12 space-x-12">
+        <div id="strikesA" class="flex space-x-2"></div>
+        <div id="strikesB" class="flex space-x-2"></div>
+    </div>
 
     <!-- Mode Toggle Button -->
-    <div class="mb-6 w-full max-w-2xl flex justify-end">
-        <button id="modeToggleBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg score-button">
-            Switch to Control Mode
+    <div class="mt-8 w-full max-w-md flex justify-end">
+        <button id="modeToggleBtn" class="bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg">
+            Show Controls
         </button>
     </div>
 
-    <!-- Main Container -->
-    <div class="w-full max-w-2xl mx-auto space-y-8">
-        <!-- Question Section -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 text-center">
-            <h2 class="text-xl font-bold text-gray-800 mb-2">Survey Says...</h2>
-            <p id="question" class="text-2xl font-semibold text-blue-800">
-                <!-- Question will be updated by JavaScript -->
-            </p>
-        </div>
-        
-        <!-- Game Board Cards -->
-        <div id="gameBoard" class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-            <!-- Cards will be inserted here by JavaScript -->
-        </div>
-
-        <!-- Score Display Panel -->
-        <div id="scoreDisplayPanel" class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
-            <div class="flex justify-between items-center text-center">
-                <div class="flex-1">
-                    <h3 class="text-xl font-semibold text-gray-700">Team A</h3>
-                    <p id="scoreA" class="text-4xl font-extrabold text-blue-600">0</p>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-xl font-semibold text-gray-700">Team B</h3>
-                    <p id="scoreB" class="text-4xl font-extrabold text-red-600">0</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Control Panel (initially hidden) -->
-        <div id="controlPanel" class="bg-white rounded-2xl shadow-xl p-6 space-y-4 hidden">
-            <!-- Answers List for Control Panel -->
-            <div class="space-y-2">
-                <h3 class="text-lg font-bold text-gray-800">Answers</h3>
-                <div id="controlAnswers" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Answers will be dynamically inserted here -->
-                </div>
-            </div>
-
-            <!-- Input for revealing answers -->
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <input type="number" id="revealInput" placeholder="Reveal # (1-6)" class="flex-1 rounded-lg border-gray-300 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="revealBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg score-button">
-                    Reveal Answer
+    <!-- Control Panel (initially hidden) -->
+    <div id="controlPanel" class="control-panel w-full max-w-2xl mt-8 hidden">
+        <h3 class="text-xl font-bold mb-4 text-center">Control Panel</h3>
+        <div class="flex flex-col space-y-4">
+            <!-- Reveal Answer Section -->
+            <div class="flex items-center space-x-2">
+                <input type="number" id="revealInput" placeholder="Reveal # (1-6)" class="flex-1 rounded-lg bg-gray-700 text-white px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="revealBtn" class="bg-blue-600 text-white font-bold py-3 px-4 rounded-lg">
+                    Reveal
                 </button>
             </div>
             
-            <!-- Buzz-in and Point Buttons -->
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
-                <button id="teamABuzz" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-4 px-4 rounded-lg score-button">
-                    Team A Buzz
+            <!-- Point and Strike Buttons -->
+            <div class="grid grid-cols-2 gap-4">
+                <button id="addPointsA" class="bg-green-600 text-white font-bold py-3 px-4 rounded-lg">
+                    Add Points to Team A
                 </button>
-                <button id="teamBBuzz" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-4 px-4 rounded-lg score-button">
-                    Team B Buzz
+                <button id="addPointsB" class="bg-red-600 text-white font-bold py-3 px-4 rounded-lg">
+                    Add Points to Team B
+                </button>
+                <button id="addStrikeA" class="bg-gray-700 text-white font-bold py-3 px-4 rounded-lg">
+                    Add Strike to Team A
+                </button>
+                <button id="addStrikeB" class="bg-gray-700 text-white font-bold py-3 px-4 rounded-lg">
+                    Add Strike to Team B
                 </button>
             </div>
             
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <button id="addPointsA" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg score-button">
-                    Add Current Points to Team A
-                </button>
-                <button id="addPointsB" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg score-button">
-                    Add Current Points to Team B
-                </button>
-            </div>
-            <div class="pt-4 text-center">
-                <button id="resetBoard" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg score-button">
-                    Reset Board
-                </button>
-            </div>
+            <!-- Reset Button -->
+            <button id="resetBoard" class="bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">
+                Reset Board
+            </button>
         </div>
     </div>
 
     <script>
         // Game data - change this to create new questions and answers
         const gameData = {
-            question: "Name a famous landmark.",
+            question: "WYMIEŃ NAJ BARDZIEJ ZNANĄ POSTAĆ Z HARRY'EGO POTTERA",
             answers: [
-                { answer: "Eiffel Tower", value: 35 },
-                { answer: "Statue of Liberty", value: 25 },
-                { answer: "Great Wall of China", value: 18 },
-                { answer: "Pyramids of Giza", value: 12 },
-                { answer: "Colosseum", value: 8 },
-                { answer: "Taj Mahal", value: 2 }
+                { answer: "HARRY POTTER", value: 40 },
+                { answer: "HERMIONA GRANGER", value: 30 },
+                { answer: "RON WEASLEY", value: 15 },
+                { answer: "ALBUS DUMBLEDORE", value: 10 },
+                { answer: "VOLDEMORT", value: 5 },
+                { answer: "SEVERUS SNAPE", value: 0 }
             ]
         };
 
         // Key for localStorage
-        const localStorageKey = 'feudGameState';
+        const localStorageKey = 'familiadaGameState';
 
         // Get all the HTML elements
         const modeToggleBtn = document.getElementById('modeToggleBtn');
         const controlPanelEl = document.getElementById('controlPanel');
-        const scoreDisplayPanelEl = document.getElementById('scoreDisplayPanel');
         const questionEl = document.getElementById('question');
         const gameBoardEl = document.getElementById('gameBoard');
         const scoreAEl = document.getElementById('scoreA');
@@ -212,15 +225,18 @@
         const revealBtn = document.getElementById('revealBtn');
         const addPointsA = document.getElementById('addPointsA');
         const addPointsB = document.getElementById('addPointsB');
-        const teamABuzz = document.getElementById('teamABuzz');
-        const teamBBuzz = document.getElementById('teamBBuzz');
+        const addStrikeA = document.getElementById('addStrikeA');
+        const addStrikeB = document.getElementById('addStrikeB');
         const resetBtn = document.getElementById('resetBoard');
-        const controlAnswersEl = document.getElementById('controlAnswers');
+        const strikesAEl = document.getElementById('strikesA');
+        const strikesBEl = document.getElementById('strikesB');
 
         // Game state variables
         let gameState = {
             scoreA: 0,
             scoreB: 0,
+            strikesA: 0,
+            strikesB: 0,
             boardState: [],
             currentPoints: 0,
             question: gameData.question
@@ -248,59 +264,30 @@
             gameBoardEl.innerHTML = '';
             questionEl.textContent = gameState.question;
             gameState.boardState.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.classList.add('feud-card');
-                if (item.revealed) {
-                    card.classList.add('revealed');
-                } else {
-                    // Add click listener only to unrevealed cards
-                    card.classList.add('cursor-pointer');
-                    card.addEventListener('click', () => {
-                        revealCard(index + 1);
-                    });
-                }
-                card.innerHTML = `
-                    <div class="feud-card-face feud-card-front">
-                        <span class="index">${index + 1}</span>
-                        <span class="text-xl font-bold">FEUD!</span>
+                const answerItem = document.createElement('div');
+                answerItem.classList.add('answer-item');
+                answerItem.innerHTML = `
+                    <span class="answer-number">${index + 1}.</span>
+                    <div class="answer-line-container">
+                        <div class="answer-line"></div>
+                        ${item.revealed ? `<span class="answer-text">${item.answer}</span>` : ''}
                     </div>
-                    <div class="feud-card-face feud-card-back">
-                        <span class="answer">${item.answer}</span>
-                        <span class="value">${item.value}</span>
-                    </div>
+                    <span class="answer-value">${item.revealed ? item.value : ''}</span>
                 `;
-                gameBoardEl.appendChild(card);
+                gameBoardEl.appendChild(answerItem);
             });
             updateScores();
         }
 
-        // Function to render answers on the control panel
-        function renderControlAnswers() {
-            controlAnswersEl.innerHTML = '';
-            gameData.answers.forEach((item, index) => {
-                const answerDiv = document.createElement('div');
-                answerDiv.classList.add('flex', 'justify-between', 'items-center', 'bg-gray-100', 'p-3', 'rounded-lg', 'text-gray-800');
-                answerDiv.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-lg text-blue-600">${index + 1}.</span>
-                        <span class="font-medium">${item.answer}</span>
-                    </div>
-                    <span class="font-bold text-lg text-green-600">${item.value}</span>
-                `;
-                controlAnswersEl.appendChild(answerDiv);
-            });
-        }
-
-        // Function to reveal a card
-        function revealCard(index) {
-            const cardIndex = index - 1;
-            if (cardIndex >= 0 && cardIndex < gameState.boardState.length) {
-                const card = gameState.boardState[cardIndex];
-                if (!card.revealed) {
-                    card.revealed = true;
-                    gameState.currentPoints += card.value;
+        // Function to reveal an answer
+        function revealAnswer(index) {
+            const answerIndex = index - 1;
+            if (answerIndex >= 0 && answerIndex < gameState.boardState.length) {
+                const answer = gameState.boardState[answerIndex];
+                if (!answer.revealed) {
+                    answer.revealed = true;
+                    gameState.currentPoints += answer.value;
                     saveGameState();
-                    // Call renderBoard() to immediately update the display after a manual reveal
                     renderBoard(); 
                 }
             } else {
@@ -312,12 +299,33 @@
         function updateScores() {
             scoreAEl.textContent = gameState.scoreA;
             scoreBEl.textContent = gameState.scoreB;
+            updateStrikesDisplay();
+        }
+
+        // Function to update the strikes display
+        function updateStrikesDisplay() {
+            strikesAEl.innerHTML = '';
+            for (let i = 0; i < gameState.strikesA; i++) {
+                const strike = document.createElement('span');
+                strike.classList.add('strike-icon');
+                strike.textContent = '❌';
+                strikesAEl.appendChild(strike);
+            }
+            strikesBEl.innerHTML = '';
+            for (let i = 0; i < gameState.strikesB; i++) {
+                const strike = document.createElement('span');
+                strike.classList.add('strike-icon');
+                strike.textContent = '❌';
+                strikesBEl.appendChild(strike);
+            }
         }
 
         // Function to reset the game board and scores
         function resetBoard() {
             gameState.scoreA = 0;
             gameState.scoreB = 0;
+            gameState.strikesA = 0;
+            gameState.strikesB = 0;
             gameState.currentPoints = 0;
             gameState.boardState = gameData.answers.map(item => ({ ...item, revealed: false }));
             saveGameState();
@@ -326,7 +334,7 @@
         // Event listeners for the control panel
         revealBtn.addEventListener('click', () => {
             const index = parseInt(revealInputEl.value);
-            revealCard(index);
+            revealAnswer(index);
             revealInputEl.value = '';
         });
 
@@ -334,35 +342,34 @@
             gameState.scoreA += gameState.currentPoints;
             gameState.currentPoints = 0;
             saveGameState();
-            // Call renderBoard() to immediately update the display after a score change
             renderBoard(); 
-            alert(`Team A scored ${gameState.currentPoints} points!`);
         });
 
         addPointsB.addEventListener('click', () => {
             gameState.scoreB += gameState.currentPoints;
             gameState.currentPoints = 0;
             saveGameState();
-            // Call renderBoard() to immediately update the display after a score change
             renderBoard();
-            alert(`Team B scored ${gameState.currentPoints} points!`);
         });
 
-        teamABuzz.addEventListener('click', () => {
-            teamABuzz.classList.add('buzzing-button');
-            teamBBuzz.classList.remove('buzzing-button');
-            setTimeout(() => teamABuzz.classList.remove('buzzing-button'), 1000);
+        addStrikeA.addEventListener('click', () => {
+            if (gameState.strikesA < 3) {
+                gameState.strikesA++;
+                saveGameState();
+                renderBoard();
+            }
         });
-        
-        teamBBuzz.addEventListener('click', () => {
-            teamBBuzz.classList.add('buzzing-button');
-            teamABuzz.classList.remove('buzzing-button');
-            setTimeout(() => teamBBuzz.classList.remove('buzzing-button'), 1000);
+
+        addStrikeB.addEventListener('click', () => {
+            if (gameState.strikesB < 3) {
+                gameState.strikesB++;
+                saveGameState();
+                renderBoard();
+            }
         });
 
         resetBtn.addEventListener('click', () => {
             resetBoard();
-            // Call renderBoard() after resetting the board to update the display
             renderBoard();
         });
 
@@ -379,10 +386,10 @@
             const isControlMode = controlPanelEl.classList.contains('hidden');
             if (isControlMode) {
                 controlPanelEl.classList.remove('hidden');
-                modeToggleBtn.textContent = 'Switch to Display Mode';
+                modeToggleBtn.textContent = 'Hide Controls';
             } else {
                 controlPanelEl.classList.add('hidden');
-                modeToggleBtn.textContent = 'Switch to Control Mode';
+                modeToggleBtn.textContent = 'Show Controls';
             }
         });
 
@@ -391,18 +398,17 @@
             const modal = document.createElement('div');
             modal.style.cssText = `
                 position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                padding: 24px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                padding: 24px; background-color: #333; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                 display: flex; flex-direction: column; align-items: center; z-index: 1000;
-                max-width: 320px; text-align: center;
+                max-width: 320px; text-align: center; color: white;
             `;
             const messageText = document.createElement('p');
             messageText.textContent = message;
-            messageText.style.cssText = 'color: #333; font-size: 16px; margin-bottom: 16px;';
+            messageText.style.cssText = 'font-size: 16px; margin-bottom: 16px;';
             const okButton = document.createElement('button');
             okButton.textContent = 'OK';
             okButton.style.cssText = `
-                background-color: #3b82f6; color: white; padding: 8px 16px;
-                border-radius: 8px; font-weight: 500; cursor: pointer;
+                background-color: #4a5568; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 500; cursor: pointer;
             `;
             okButton.onclick = () => { modal.remove(); };
             modal.appendChild(messageText);
@@ -414,7 +420,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadGameState();
             renderBoard();
-            renderControlAnswers();
         });
     </script>
 </body>
