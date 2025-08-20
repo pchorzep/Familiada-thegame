@@ -109,7 +109,7 @@
             padding: 1.5rem;
             border-radius: 1rem;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-            max-width: 480px;
+            max-width: 768px; /* Increased width */
             margin-left: auto;
             margin-right: auto;
         }
@@ -155,6 +155,26 @@
         .highlighted {
             animation: pulse-highlight 1.5s infinite;
         }
+        
+        /* Toggle button styles */
+        .toggle-btn {
+            background-color: #4a5568;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background-color: #10b981; /* Green color for active state */
+        }
+
+        .dotted-line {
+            letter-spacing: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-black min-h-screen p-8 flex flex-col items-center justify-center">
@@ -169,7 +189,7 @@
         
         <!-- Question Box -->
         <div class="question-box p-4 font-bold">
-            <p id="question"></p>
+            <p id="question" class="dotted-line">...</p>
         </div>
 
         <!-- Team B Score -->
@@ -206,60 +226,87 @@
     </div>
 
     <!-- Control Panel (initially hidden) -->
-    <div id="controlPanel" class="control-panel w-full max-w-2xl mt-8 hidden">
+    <div id="controlPanel" class="control-panel w-full max-w-3xl mt-8 hidden">
         <h3 class="text-xl font-bold mb-4 text-center">Control Panel</h3>
-        <div class="flex flex-col space-y-4">
-            <!-- Answers List for Control Panel -->
-            <div class="space-y-2">
-                <h3 class="text-lg font-bold mb-2">Answers</h3>
-                <ul id="controlAnswers" class="list-disc pl-5 text-yellow-300 space-y-2">
-                    <!-- Answers with checkboxes will be dynamically inserted here -->
-                </ul>
-            </div>
-            
-            <!-- Point and Strike Buttons -->
-            <div class="grid grid-cols-2 gap-4">
+        <!-- Displays for current question and points -->
+        <div class="mb-4 text-center">
+            <h4 class="text-lg font-semibold text-yellow-500">Current Question:</h4>
+            <p id="controlQuestionDisplay" class="text-lg italic mb-2"></p>
+        </div>
+
+        <!-- Main control grid with buttons and answers -->
+        <div class="grid grid-cols-3 gap-4 items-start">
+            <!-- Team A Buttons -->
+            <div class="flex flex-col space-y-4">
                 <button id="addPointsA" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg">
-                    Add Points to Team A
+                    Add Points Team A
                 </button>
-                <button id="addPointsB" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
-                    Add Points to Team B
-                </button>
-                <button id="addStrikeA" class="bg-gray-700 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg">
-                    Add Strike to Team A
-                </button>
-                <button id="addStrikeB" class="bg-gray-700 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
-                    Add Strike to Team B
-                </button>
+                <div class="flex flex-row space-x-2">
+                    <button id="addStrikeA" class="bg-gray-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Add Strike
+                    </button>
+                    <button id="removeStrikeA" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg">
+                        Remove Strike
+                    </button>
+                </div>
+                <div class="flex flex-col space-y-2 mt-4">
+                    <span class="text-gray-400 text-sm">Active Team</span>
+                    <button id="teamAToggle" class="toggle-btn bg-gray-700">
+                        RODZINA 1
+                    </button>
+                </div>
+            </div>
+
+            <!-- Answers List with Checkboxes -->
+            <div id="controlAnswerList" class="flex flex-col space-y-2">
+                <!-- Answers will be dynamically inserted here -->
             </div>
             
-            <!-- Next Question and Reset Buttons -->
-            <div class="grid grid-cols-2 gap-4">
-                <button id="nextQuestionBtn" class="bg-purple-600 text-white font-bold py-3 px-4 rounded-lg">
-                    Next Question
+            <!-- Team B Buttons -->
+            <div class="flex flex-col space-y-4">
+                <button id="addPointsB" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
+                    Add Points Team B
                 </button>
-                <button id="resetBoard" class="bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">
-                    Reset Game (Full)
-                </button>
+                <div class="flex flex-row space-x-2">
+                    <button id="addStrikeB" class="bg-gray-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Add Strike
+                    </button>
+                    <button id="removeStrikeB" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg">
+                        Remove Strike
+                    </button>
+                </div>
+                <div class="flex flex-col space-y-2 mt-4">
+                    <span class="text-gray-400 text-sm">Active Team</span>
+                    <button id="teamBToggle" class="toggle-btn bg-gray-700">
+                        RODZINA 2
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <!-- Global control buttons below the main grid -->
+        <div class="grid grid-cols-2 gap-4 mt-8">
+            <button id="nextQuestionBtn" class="bg-purple-600 text-white font-bold py-3 px-4 rounded-lg">
+                Next Question
+            </button>
+            <button id="resetBoard" class="bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">
+                Reset Game (Full)
+            </button>
         </div>
     </div>
 
-    <!-- Team Selection Modal -->
-    <div id="teamSelectionModal" class="modal-overlay hidden">
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h2 class="text-4xl mb-4 font-bold">KTÓRA DRUŻYNA ZACZYNA?</h2>
-            <div class="flex justify-center space-x-8 mt-6">
-                <button id="teamA_btn" class="bg-red-600 text-white font-bold py-3 px-8 rounded-lg text-2xl">
-                    RODZINA 1
-                </button>
-                <button id="teamB_btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-2xl">
-                    RODZINA 2
-                </button>
+            <h4 class="text-2xl font-bold mb-4">Are you sure?</h4>
+            <p class="mb-6">This will reset the entire game, including scores and questions.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmYes" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg">Yes</button>
+                <button id="confirmNo" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">No</button>
             </div>
         </div>
     </div>
-
+    
     <script>
         // Game data - change this to create new questions and answers
         const allGameData = [
@@ -302,16 +349,23 @@
         const addPointsA = document.getElementById('addPointsA');
         const addPointsB = document.getElementById('addPointsB');
         const addStrikeA = document.getElementById('addStrikeA');
+        const removeStrikeA = document.getElementById('removeStrikeA');
         const addStrikeB = document.getElementById('addStrikeB');
+        const removeStrikeB = document.getElementById('removeStrikeB');
         const nextQuestionBtn = document.getElementById('nextQuestionBtn');
         const resetBtn = document.getElementById('resetBoard');
         const strikesAEl = document.getElementById('strikesA');
         const strikesBEl = document.getElementById('strikesB');
-        const controlAnswersEl = document.getElementById('controlAnswers');
-        const teamSelectionModal = document.getElementById('teamSelectionModal');
-        const teamA_btn = document.getElementById('teamA_btn');
-        const teamB_btn = document.getElementById('teamB_btn');
         const currentPointsDisplay = document.getElementById('currentPointsDisplay');
+        const controlAnswerListEl = document.getElementById('controlAnswerList');
+        const controlQuestionDisplayEl = document.getElementById('controlQuestionDisplay');
+        const teamAToggle = document.getElementById('teamAToggle');
+        const teamBToggle = document.getElementById('teamBToggle');
+
+        // Modal elements for reset confirmation
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmYesBtn = document.getElementById('confirmYes');
+        const confirmNoBtn = document.getElementById('confirmNo');
 
         // Game state variables
         let gameState = {
@@ -322,7 +376,8 @@
             boardState: [],
             currentPoints: 0,
             currentQuestionIndex: 0,
-            activeTeam: null // 'A' or 'B'
+            activeTeam: null, // 'A' or 'B'
+            questionRevealed: false
         };
 
         // Function to load game state from localStorage
@@ -338,10 +393,11 @@
                     // Update the scores and board based on the loaded state
                     updateScores();
                     renderBoard();
+                    renderControlPanelAnswers();
                     highlightActiveTeam();
                 }
             } else {
-                // If no state exists, initialize a new one from default data and show modal
+                // If no state exists, initialize a new one from default data
                 startNewRound();
             }
         }
@@ -354,8 +410,20 @@
         // Function to render the game board based on current state
         function renderBoard() {
             gameBoardEl.innerHTML = '';
-            questionEl.textContent = allGameData[gameState.currentQuestionIndex].question;
-            currentPointsDisplay.textContent = gameState.currentPoints; // Display current points
+            const currentQuestion = allGameData[gameState.currentQuestionIndex].question;
+            const currentPoints = gameState.currentPoints;
+
+            // Update main board displays based on questionRevealed state
+            if (gameState.questionRevealed) {
+                questionEl.textContent = currentQuestion;
+            } else {
+                questionEl.textContent = '...';
+            }
+            currentPointsDisplay.textContent = currentPoints;
+
+            // Update control panel displays
+            controlQuestionDisplayEl.textContent = currentQuestion;
+
             gameState.boardState.forEach((item, index) => {
                 const answerItem = document.createElement('div');
                 answerItem.classList.add('answer-item');
@@ -370,35 +438,35 @@
                 gameBoardEl.appendChild(answerItem);
             });
             updateScores();
-            renderControlAnswers();
         }
 
-        // Function to render answers on the control panel
-        function renderControlAnswers() {
-            controlAnswersEl.innerHTML = '';
-            const currentGameData = allGameData[gameState.currentQuestionIndex];
+        // Function to render the answers list in the control panel
+        function renderControlPanelAnswers() {
+            controlAnswerListEl.innerHTML = ''; // Clear previous answers
             gameState.boardState.forEach((item, index) => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('flex', 'justify-between', 'items-center', 'text-yellow-300');
-                listItem.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" id="reveal-${index}" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded" ${item.revealed ? 'checked' : ''}>
-                        <span>${index + 1}. ${item.answer}</span>
-                    </div>
-                    <span class="font-bold text-lg">${item.value}</span>
-                `;
-                controlAnswersEl.appendChild(listItem);
-
-                // Add event listener to the checkbox
-                const checkbox = document.getElementById(`reveal-${index}`);
-                checkbox.addEventListener('change', () => {
-                    if (checkbox.checked) {
+                const answerItem = document.createElement('div');
+                answerItem.classList.add('flex', 'items-center', 'space-x-2');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `answer-${index}`;
+                checkbox.classList.add('h-5', 'w-5', 'text-yellow-500', 'rounded', 'border-gray-300', 'focus:ring-yellow-500');
+                checkbox.checked = item.revealed;
+                checkbox.disabled = item.revealed;
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
                         revealAnswer(index);
                     }
                 });
+                const label = document.createElement('label');
+                label.htmlFor = `answer-${index}`;
+                label.classList.add('text-lg', 'font-semibold');
+                label.textContent = `${item.answer} (${item.value})`;
+                answerItem.appendChild(checkbox);
+                answerItem.appendChild(label);
+                controlAnswerListEl.appendChild(answerItem);
             });
         }
-
+        
         // Function to reveal an answer
         function revealAnswer(index) {
             if (index >= 0 && index < gameState.boardState.length) {
@@ -406,8 +474,15 @@
                 if (!answer.revealed) {
                     answer.revealed = true;
                     gameState.currentPoints += answer.value;
+
+                    if (!gameState.questionRevealed) {
+                        gameState.questionRevealed = true;
+                        questionEl.textContent = allGameData[gameState.currentQuestionIndex].question;
+                    }
+
                     saveGameState();
                     renderBoard(); 
+                    renderControlPanelAnswers(); // Re-render to disable the revealed checkbox
                 }
             }
         }
@@ -419,7 +494,7 @@
             updateStrikesDisplay();
         }
 
-        // Function to update the strikes display
+        // Function to update the strikes display on the main board
         function updateStrikesDisplay() {
             strikesAEl.innerHTML = '';
             for (let i = 0; i < gameState.strikesA; i++) {
@@ -437,24 +512,19 @@
             }
         }
 
-        // Function to show the team selection modal
-        function showTeamSelectionModal() {
-            teamSelectionModal.classList.remove('hidden');
-        }
-        
-        // Function to hide the team selection modal
-        function hideTeamSelectionModal() {
-            teamSelectionModal.classList.add('hidden');
-        }
-
-        // Function to highlight the active team's score box
+        // Function to highlight the active team's score box and toggle button
         function highlightActiveTeam() {
             scoreBoxA.classList.remove('highlighted');
             scoreBoxB.classList.remove('highlighted');
+            teamAToggle.classList.remove('active');
+            teamBToggle.classList.remove('active');
+
             if (gameState.activeTeam === 'A') {
                 scoreBoxA.classList.add('highlighted');
+                teamAToggle.classList.add('active');
             } else if (gameState.activeTeam === 'B') {
                 scoreBoxB.classList.add('highlighted');
+                teamBToggle.classList.add('active');
             }
         }
 
@@ -465,16 +535,17 @@
             gameState.strikesB = 0;
             gameState.currentPoints = 0;
             gameState.boardState = currentGameData.answers.map(item => ({ ...item, revealed: false }));
+            gameState.questionRevealed = false;
             saveGameState();
         }
 
-        // Function to start a new round by showing the modal
+        // Function to start a new round
         function startNewRound() {
             resetRound();
-            gameState.activeTeam = null;
+            gameState.activeTeam = null; // No active team at the start of a round
             highlightActiveTeam(); // Remove any previous highlight
-            showTeamSelectionModal();
             renderBoard();
+            renderControlPanelAnswers();
         }
 
         // Function to reset the entire game
@@ -489,24 +560,40 @@
 
         // Event listeners for the control panel
         addPointsA.addEventListener('click', () => {
-            gameState.scoreA += gameState.currentPoints;
-            gameState.currentPoints = 0;
-            saveGameState();
-            renderBoard(); 
+            if (gameState.activeTeam === 'A') {
+                gameState.scoreA += gameState.currentPoints;
+                gameState.currentPoints = 0;
+                saveGameState();
+                renderBoard();
+            } else {
+                alert("Team A is not the active team! Please select them with the toggle.");
+            }
         });
 
         addPointsB.addEventListener('click', () => {
-            gameState.scoreB += gameState.currentPoints;
-            gameState.currentPoints = 0;
-            saveGameState();
-            renderBoard();
+            if (gameState.activeTeam === 'B') {
+                gameState.scoreB += gameState.currentPoints;
+                gameState.currentPoints = 0;
+                saveGameState();
+                renderBoard();
+            } else {
+                alert("Team B is not the active team! Please select them with the toggle.");
+            }
         });
 
         addStrikeA.addEventListener('click', () => {
             if (gameState.strikesA < 3) {
                 gameState.strikesA++;
                 saveGameState();
-                renderBoard();
+                updateStrikesDisplay();
+            }
+        });
+
+        removeStrikeA.addEventListener('click', () => {
+            if (gameState.strikesA > 0) {
+                gameState.strikesA--;
+                saveGameState();
+                updateStrikesDisplay();
             }
         });
 
@@ -514,9 +601,31 @@
             if (gameState.strikesB < 3) {
                 gameState.strikesB++;
                 saveGameState();
-                renderBoard();
+                updateStrikesDisplay();
             }
         });
+
+        removeStrikeB.addEventListener('click', () => {
+            if (gameState.strikesB > 0) {
+                gameState.strikesB--;
+                saveGameState();
+                updateStrikesDisplay();
+            }
+        });
+
+        // Event listeners for the new toggle buttons
+        teamAToggle.addEventListener('click', () => {
+            gameState.activeTeam = 'A';
+            saveGameState();
+            highlightActiveTeam();
+        });
+
+        teamBToggle.addEventListener('click', () => {
+            gameState.activeTeam = 'B';
+            saveGameState();
+            highlightActiveTeam();
+        });
+
 
         nextQuestionBtn.addEventListener('click', () => {
             // Move to the next question, looping back to the start
@@ -524,24 +633,19 @@
             startNewRound();
         });
         
+        // Event listener for the custom confirmation modal on reset
         resetBtn.addEventListener('click', () => {
+            confirmModal.classList.remove('hidden');
+        });
+
+        confirmYesBtn.addEventListener('click', () => {
             resetGame();
             renderBoard();
+            confirmModal.classList.add('hidden');
         });
-
-        // Event listeners for the modal buttons
-        teamA_btn.addEventListener('click', () => {
-            gameState.activeTeam = 'A';
-            hideTeamSelectionModal();
-            highlightActiveTeam();
-            saveGameState();
-        });
-
-        teamB_btn.addEventListener('click', () => {
-            gameState.activeTeam = 'B';
-            hideTeamSelectionModal();
-            highlightActiveTeam();
-            saveGameState();
+        
+        confirmNoBtn.addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
         });
 
         // Listen for changes in localStorage from other tabs/windows
