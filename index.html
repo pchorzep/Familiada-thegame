@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Familiada Classic Board</title>
+    <title>Familiada Static Board</title>
     <!-- Using Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Using Google Fonts for 'Bebas Neue' -->
@@ -22,6 +22,7 @@
             padding: 0.5rem 1.5rem;
             border-radius: 0.5rem;
             text-align: center;
+            transition: all 0.3s ease;
         }
         
         .score-box h3 {
@@ -97,7 +98,7 @@
         
         .strike-icon {
             font-size: 2rem;
-            color: red;
+            color: #ffcc00; /* Changed to yellow */
             text-shadow: 1px 1px 2px #000;
         }
         
@@ -120,6 +121,40 @@
         .control-panel button:hover {
             opacity: 0.8;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #111;
+            color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Highlight Animation */
+        @keyframes pulse-highlight {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .highlighted {
+            animation: pulse-highlight 1.5s infinite;
+        }
     </style>
 </head>
 <body class="bg-black min-h-screen p-8 flex flex-col items-center justify-center">
@@ -127,32 +162,40 @@
     <!-- Top Score and Question Area -->
     <div class="w-full max-w-5xl flex justify-between items-start mb-12">
         <!-- Team A Score -->
-        <div class="score-box bg-red-600">
+        <div id="scoreBoxA" class="score-box bg-red-600">
             <h3 class="font-bold">RODZINA 1</h3>
             <p id="scoreA" class="font-bold">0</p>
         </div>
         
         <!-- Question Box -->
         <div class="question-box p-4 font-bold">
-            <p id="question">WYMIEŃ NAJ BARDZIEJ ZNANĄ POSTAĆ Z HARRY'EGO POTTERA</p>
+            <p id="question"></p>
         </div>
 
         <!-- Team B Score -->
-        <div class="score-box bg-blue-600">
+        <div id="scoreBoxB" class="score-box bg-blue-600">
             <h3 class="font-bold">RODZINA 2</h3>
             <p id="scoreB" class="font-bold">0</p>
         </div>
     </div>
 
-    <!-- Main Game Board -->
-    <div id="gameBoard" class="w-full max-w-5xl text-yellow-500 font-bold answer-list">
-        <!-- Answers will be dynamically inserted here -->
-    </div>
+    <!-- Main Game Board and Strikes Display -->
+    <div class="w-full max-w-5xl flex items-center justify-between">
+        <!-- Strikes for Team A (Left side) -->
+        <div id="strikesA" class="flex flex-col items-center w-1/4"></div>
 
-    <!-- Strikes Display -->
-    <div class="flex justify-center mt-12 space-x-12">
-        <div id="strikesA" class="flex space-x-2"></div>
-        <div id="strikesB" class="flex space-x-2"></div>
+        <!-- Main Game Board -->
+        <div class="flex-shrink-0 w-1/2 flex flex-col items-center">
+            <!-- Display for Current Points -->
+            <div id="currentPointsDisplay" class="text-yellow-500 font-bold text-5xl mb-4">0</div>
+            
+            <div id="gameBoard" class="text-yellow-500 font-bold answer-list w-full">
+                <!-- Answers will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Strikes for Team B (Right side) -->
+        <div id="strikesB" class="flex flex-col items-center w-1/4"></div>
     </div>
 
     <!-- Mode Toggle Button -->
@@ -166,50 +209,83 @@
     <div id="controlPanel" class="control-panel w-full max-w-2xl mt-8 hidden">
         <h3 class="text-xl font-bold mb-4 text-center">Control Panel</h3>
         <div class="flex flex-col space-y-4">
-            <!-- Reveal Answer Section -->
-            <div class="flex items-center space-x-2">
-                <input type="number" id="revealInput" placeholder="Reveal # (1-6)" class="flex-1 rounded-lg bg-gray-700 text-white px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="revealBtn" class="bg-blue-600 text-white font-bold py-3 px-4 rounded-lg">
-                    Reveal
-                </button>
+            <!-- Answers List for Control Panel -->
+            <div class="space-y-2">
+                <h3 class="text-lg font-bold mb-2">Answers</h3>
+                <ul id="controlAnswers" class="list-disc pl-5 text-yellow-300 space-y-2">
+                    <!-- Answers with checkboxes will be dynamically inserted here -->
+                </ul>
             </div>
             
             <!-- Point and Strike Buttons -->
             <div class="grid grid-cols-2 gap-4">
-                <button id="addPointsA" class="bg-green-600 text-white font-bold py-3 px-4 rounded-lg">
+                <button id="addPointsA" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg">
                     Add Points to Team A
                 </button>
-                <button id="addPointsB" class="bg-red-600 text-white font-bold py-3 px-4 rounded-lg">
+                <button id="addPointsB" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
                     Add Points to Team B
                 </button>
-                <button id="addStrikeA" class="bg-gray-700 text-white font-bold py-3 px-4 rounded-lg">
+                <button id="addStrikeA" class="bg-gray-700 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg">
                     Add Strike to Team A
                 </button>
-                <button id="addStrikeB" class="bg-gray-700 text-white font-bold py-3 px-4 rounded-lg">
+                <button id="addStrikeB" class="bg-gray-700 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
                     Add Strike to Team B
                 </button>
             </div>
             
-            <!-- Reset Button -->
-            <button id="resetBoard" class="bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">
-                Reset Board
-            </button>
+            <!-- Next Question and Reset Buttons -->
+            <div class="grid grid-cols-2 gap-4">
+                <button id="nextQuestionBtn" class="bg-purple-600 text-white font-bold py-3 px-4 rounded-lg">
+                    Next Question
+                </button>
+                <button id="resetBoard" class="bg-gray-500 text-white font-bold py-3 px-4 rounded-lg">
+                    Reset Game (Full)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Selection Modal -->
+    <div id="teamSelectionModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-4xl mb-4 font-bold">KTÓRA DRUŻYNA ZACZYNA?</h2>
+            <div class="flex justify-center space-x-8 mt-6">
+                <button id="teamA_btn" class="bg-red-600 text-white font-bold py-3 px-8 rounded-lg text-2xl">
+                    RODZINA 1
+                </button>
+                <button id="teamB_btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-2xl">
+                    RODZINA 2
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         // Game data - change this to create new questions and answers
-        const gameData = {
-            question: "WYMIEŃ NAJ BARDZIEJ ZNANĄ POSTAĆ Z HARRY'EGO POTTERA",
-            answers: [
-                { answer: "HARRY POTTER", value: 40 },
-                { answer: "HERMIONA GRANGER", value: 30 },
-                { answer: "RON WEASLEY", value: 15 },
-                { answer: "ALBUS DUMBLEDORE", value: 10 },
-                { answer: "VOLDEMORT", value: 5 },
-                { answer: "SEVERUS SNAPE", value: 0 }
-            ]
-        };
+        const allGameData = [
+            {
+                question: "Wymień serial, o którym wszyscy mówili w latach 2010–2025",
+                answers: [
+                    { answer: "Gra o tron", value: 43 },
+                    { answer: "Stranger Things", value: 38 },
+                    { answer: "Squid Game", value: 33 },
+                    { answer: "Breaking Bad", value: 28 },
+                    { answer: "Black Mirror", value: 21 },
+                    { answer: "The Last of Us", value: 15 }
+                ]
+            },
+            {
+                question: "WYMIEŃ NAJ BARDZIEJ ZNANĄ POSTAĆ Z HARRY'EGO POTTERA",
+                answers: [
+                    { answer: "HARRY POTTER", value: 40 },
+                    { answer: "HERMIONA GRANGER", value: 30 },
+                    { answer: "RON WEASLEY", value: 15 },
+                    { answer: "ALBUS DUMBLEDORE", value: 10 },
+                    { answer: "VOLDEMORT", value: 5 },
+                    { answer: "SEVERUS SNAPE", value: 0 }
+                ]
+            }
+        ];
 
         // Key for localStorage
         const localStorageKey = 'familiadaGameState';
@@ -221,15 +297,21 @@
         const gameBoardEl = document.getElementById('gameBoard');
         const scoreAEl = document.getElementById('scoreA');
         const scoreBEl = document.getElementById('scoreB');
-        const revealInputEl = document.getElementById('revealInput');
-        const revealBtn = document.getElementById('revealBtn');
+        const scoreBoxA = document.getElementById('scoreBoxA');
+        const scoreBoxB = document.getElementById('scoreBoxB');
         const addPointsA = document.getElementById('addPointsA');
         const addPointsB = document.getElementById('addPointsB');
         const addStrikeA = document.getElementById('addStrikeA');
         const addStrikeB = document.getElementById('addStrikeB');
+        const nextQuestionBtn = document.getElementById('nextQuestionBtn');
         const resetBtn = document.getElementById('resetBoard');
         const strikesAEl = document.getElementById('strikesA');
         const strikesBEl = document.getElementById('strikesB');
+        const controlAnswersEl = document.getElementById('controlAnswers');
+        const teamSelectionModal = document.getElementById('teamSelectionModal');
+        const teamA_btn = document.getElementById('teamA_btn');
+        const teamB_btn = document.getElementById('teamB_btn');
+        const currentPointsDisplay = document.getElementById('currentPointsDisplay');
 
         // Game state variables
         let gameState = {
@@ -239,7 +321,8 @@
             strikesB: 0,
             boardState: [],
             currentPoints: 0,
-            question: gameData.question
+            currentQuestionIndex: 0,
+            activeTeam: null // 'A' or 'B'
         };
 
         // Function to load game state from localStorage
@@ -247,10 +330,19 @@
             const storedState = localStorage.getItem(localStorageKey);
             if (storedState) {
                 gameState = JSON.parse(storedState);
+                if (gameState.currentQuestionIndex === undefined || !allGameData[gameState.currentQuestionIndex]) {
+                    // If the stored state is invalid or missing the question index, reset to the first question
+                    gameState.currentQuestionIndex = 0;
+                    startNewRound();
+                } else {
+                    // Update the scores and board based on the loaded state
+                    updateScores();
+                    renderBoard();
+                    highlightActiveTeam();
+                }
             } else {
-                // If no state exists, initialize a new one
-                gameState.boardState = gameData.answers.map(item => ({ ...item, revealed: false }));
-                saveGameState();
+                // If no state exists, initialize a new one from default data and show modal
+                startNewRound();
             }
         }
 
@@ -262,7 +354,8 @@
         // Function to render the game board based on current state
         function renderBoard() {
             gameBoardEl.innerHTML = '';
-            questionEl.textContent = gameState.question;
+            questionEl.textContent = allGameData[gameState.currentQuestionIndex].question;
+            currentPointsDisplay.textContent = gameState.currentPoints; // Display current points
             gameState.boardState.forEach((item, index) => {
                 const answerItem = document.createElement('div');
                 answerItem.classList.add('answer-item');
@@ -277,21 +370,45 @@
                 gameBoardEl.appendChild(answerItem);
             });
             updateScores();
+            renderControlAnswers();
+        }
+
+        // Function to render answers on the control panel
+        function renderControlAnswers() {
+            controlAnswersEl.innerHTML = '';
+            const currentGameData = allGameData[gameState.currentQuestionIndex];
+            gameState.boardState.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('flex', 'justify-between', 'items-center', 'text-yellow-300');
+                listItem.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="reveal-${index}" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded" ${item.revealed ? 'checked' : ''}>
+                        <span>${index + 1}. ${item.answer}</span>
+                    </div>
+                    <span class="font-bold text-lg">${item.value}</span>
+                `;
+                controlAnswersEl.appendChild(listItem);
+
+                // Add event listener to the checkbox
+                const checkbox = document.getElementById(`reveal-${index}`);
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        revealAnswer(index);
+                    }
+                });
+            });
         }
 
         // Function to reveal an answer
         function revealAnswer(index) {
-            const answerIndex = index - 1;
-            if (answerIndex >= 0 && answerIndex < gameState.boardState.length) {
-                const answer = gameState.boardState[answerIndex];
+            if (index >= 0 && index < gameState.boardState.length) {
+                const answer = gameState.boardState[index];
                 if (!answer.revealed) {
                     answer.revealed = true;
                     gameState.currentPoints += answer.value;
                     saveGameState();
                     renderBoard(); 
                 }
-            } else {
-                alert('Invalid number. Please enter a number from 1 to ' + gameState.boardState.length);
             }
         }
 
@@ -320,24 +437,57 @@
             }
         }
 
-        // Function to reset the game board and scores
-        function resetBoard() {
-            gameState.scoreA = 0;
-            gameState.scoreB = 0;
+        // Function to show the team selection modal
+        function showTeamSelectionModal() {
+            teamSelectionModal.classList.remove('hidden');
+        }
+        
+        // Function to hide the team selection modal
+        function hideTeamSelectionModal() {
+            teamSelectionModal.classList.add('hidden');
+        }
+
+        // Function to highlight the active team's score box
+        function highlightActiveTeam() {
+            scoreBoxA.classList.remove('highlighted');
+            scoreBoxB.classList.remove('highlighted');
+            if (gameState.activeTeam === 'A') {
+                scoreBoxA.classList.add('highlighted');
+            } else if (gameState.activeTeam === 'B') {
+                scoreBoxB.classList.add('highlighted');
+            }
+        }
+
+        // Function to reset the current round (strikes and revealed answers), but keep the score
+        function resetRound() {
+            const currentGameData = allGameData[gameState.currentQuestionIndex];
             gameState.strikesA = 0;
             gameState.strikesB = 0;
             gameState.currentPoints = 0;
-            gameState.boardState = gameData.answers.map(item => ({ ...item, revealed: false }));
+            gameState.boardState = currentGameData.answers.map(item => ({ ...item, revealed: false }));
             saveGameState();
         }
 
-        // Event listeners for the control panel
-        revealBtn.addEventListener('click', () => {
-            const index = parseInt(revealInputEl.value);
-            revealAnswer(index);
-            revealInputEl.value = '';
-        });
+        // Function to start a new round by showing the modal
+        function startNewRound() {
+            resetRound();
+            gameState.activeTeam = null;
+            highlightActiveTeam(); // Remove any previous highlight
+            showTeamSelectionModal();
+            renderBoard();
+        }
 
+        // Function to reset the entire game
+        function resetGame() {
+            gameState.scoreA = 0;
+            gameState.scoreB = 0;
+            gameState.currentQuestionIndex = 0;
+            resetRound();
+            gameState.activeTeam = null;
+            highlightActiveTeam();
+        }
+
+        // Event listeners for the control panel
         addPointsA.addEventListener('click', () => {
             gameState.scoreA += gameState.currentPoints;
             gameState.currentPoints = 0;
@@ -368,16 +518,36 @@
             }
         });
 
+        nextQuestionBtn.addEventListener('click', () => {
+            // Move to the next question, looping back to the start
+            gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % allGameData.length;
+            startNewRound();
+        });
+        
         resetBtn.addEventListener('click', () => {
-            resetBoard();
+            resetGame();
             renderBoard();
+        });
+
+        // Event listeners for the modal buttons
+        teamA_btn.addEventListener('click', () => {
+            gameState.activeTeam = 'A';
+            hideTeamSelectionModal();
+            highlightActiveTeam();
+            saveGameState();
+        });
+
+        teamB_btn.addEventListener('click', () => {
+            gameState.activeTeam = 'B';
+            hideTeamSelectionModal();
+            highlightActiveTeam();
+            saveGameState();
         });
 
         // Listen for changes in localStorage from other tabs/windows
         window.addEventListener('storage', (e) => {
             if (e.key === localStorageKey) {
                 loadGameState();
-                renderBoard();
             }
         });
 
@@ -419,7 +589,6 @@
         // Initialize the board and control answers when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             loadGameState();
-            renderBoard();
         });
     </script>
 </body>
