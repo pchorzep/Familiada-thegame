@@ -756,7 +756,8 @@
             }
             
             // Select a random, unused question
-            const randomIndex = Math.floor(Math.random() * gameState.availableQuestions.length);
+            // const randomIndex = Math.floor(Math.random() * gameState.availableQuestions.length);
+            const randomIndex = 0 ; // disable randomization
             const selectedQuestionIndex = gameState.availableQuestions[randomIndex];
             
             // Set the new question index and remove it from the available list
